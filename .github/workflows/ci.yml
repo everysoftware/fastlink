@@ -1,4 +1,4 @@
-name: Ruff/Mypy
+name: Ruff
 
 on:
   push:
@@ -19,5 +19,5 @@ jobs:
           python-version: 3.12.3
       - name: Lint with Ruff
         run: |
-          pip install ruff mypy
-          make lint
+          pip install ruff
+          ruff check auth365

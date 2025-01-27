@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "auth365"
+version = "0.1.0"
+description = ""
+authors = ["everysoftware <pravitel2015ify@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.10.6"
+httpx = "^0.28.1"
+pyjwt = "^2.10.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.3"
+mypy = "^1.14.1"
+fastapi = "^0.115.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+fix = true
+indent-width = 4
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+strict = true
+pretty = true
+plugins = "pydantic.mypy"
+disable_error_code = ["union-attr"]
+
+[[tool.mypy.overrides]]
+module = "*.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

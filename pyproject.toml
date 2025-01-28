@@ -10,12 +10,13 @@ python = "^3.12"
 pydantic = "^2.10.6"
 httpx = "^0.28.1"
 pyjwt = "^2.10.1"
+fastapi = {extras = ["standart"], version = "^0.115.7"}
 
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9.3"
 mypy = "^1.14.1"
-fastapi = "^0.115.7"
+fastapi = {extras = ["all"], version = "^0.115.7"}
 
 [build-system]
 requires = ["poetry-core"]
@@ -34,7 +35,6 @@ docstring-code-format = true
 strict = true
 pretty = true
 plugins = "pydantic.mypy"
-disable_error_code = ["union-attr"]
 
 [[tool.mypy.overrides]]
 module = "*.*"

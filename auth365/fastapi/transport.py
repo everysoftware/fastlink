@@ -1,12 +1,11 @@
 import abc
 from abc import ABC
-from typing import Mapping, Literal
+from typing import Literal
 
-from fastapi import Response, Request
+from fastapi import Response, Request, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.responses import JSONResponse
 
-from auth365.fastapi.exceptions import NoTokenProvided
 from auth365.schemas import TokenResponse
 
 
@@ -24,9 +23,6 @@ class Transport(ABC):
     @abc.abstractmethod
     def delete_token(self, response: Response) -> Response: ...
 
-    def __call__(self, request: Request) -> str | None:
-        return self.get_token(request)
-
     def get_login_response(self, token: TokenResponse) -> Response:
         response = JSONResponse(content=token.model_dump())
         assert token.access_token is not None
@@ -38,13 +34,23 @@ class Transport(ABC):
         self.delete_token(response)
         return response
 
+    def __call__(self, request: Request) -> str:
+        token = self.get_token(request)
+        if token is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Not authenticated",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return token
+
 
 class HeaderTransport(Transport):
     def __init__(
         self,
         *,
         name: str = "Authorization",
-        scheme_name: str = "AccessTokenHeader",
+        scheme_name: str = "BearerHeader",
     ) -> None:
         super().__init__(name=name, scheme_name=scheme_name)
 
@@ -68,10 +74,10 @@ class CookieTransport(Transport):
     def __init__(
         self,
         *,
-        name: str = "myaccesstoken",
-        scheme_name: str = "AccessTokenCookie",
+        name: str = "access_token",
+        scheme_name: str = "BearerCookie",
         httponly: bool = True,
-        max_age: int | None = None,
+        max_age: int = 3600,
         secure: bool = False,
         samesite: Literal["lax", "strict", "none"] = "lax",
     ) -> None:
@@ -102,25 +108,3 @@ class CookieTransport(Transport):
             samesite=self.samesite,
         )
         return response
-
-
-class AuthBus:
-    transports: Mapping[str, Transport]
-
-    def __init__(self, *transports: Transport, auto_error: bool = False) -> None:
-        self.auto_error = auto_error
-        self.transports = {t.scheme_name: t for t in transports}
-
-    def parse_request(self, request: Request, *, auto_error: bool | None = None) -> str | None:
-        if auto_error is None:
-            auto_error = self.auto_error
-        for transport in self.transports.values():
-            token = transport.get_token(request)
-            if token:
-                return token
-        if auto_error:
-            raise NoTokenProvided()
-        return None
-
-    def __call__(self, request: Request) -> str | None:
-        return self.parse_request(request)

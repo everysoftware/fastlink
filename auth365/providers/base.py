@@ -9,9 +9,9 @@ from urllib.parse import urlencode
 
 import httpx
 
-from auth365.providers.exceptions import (
-    DiscoveryUnavailable,
+from auth365.exceptions import (
     TokenUnavailable,
+    DiscoveryUnavailable,
     ClientUnavailable,
     NoRedirectURI,
     AuthorizationFailed,

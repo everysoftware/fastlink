@@ -3,15 +3,15 @@ from typing import Annotated
 from fastapi import FastAPI, Depends
 from starlette.responses import RedirectResponse
 
-from auth365.providers.google import GoogleOAuth
+from auth365.providers.yandex import YandexOAuth
 from auth365.schemas import OAuth2Callback, OpenID
 from examples.config import settings
 
 app = FastAPI()
 
-oauth = GoogleOAuth(
-    settings.google_client_id,
-    settings.google_client_secret,
+oauth = YandexOAuth(
+    settings.yandex_client_id,
+    settings.yandex_client_secret,
     "http://localhost:8000/callback",
 )
 

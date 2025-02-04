@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 import hmac
-from typing import Any, Sequence
+from typing import Any, Sequence, Self
 from urllib.parse import urlencode
 
 from auth365.exceptions import Auth365Error
@@ -9,7 +9,7 @@ from auth365.schemas import TokenResponse, OpenID, TelegramCallback, DiscoveryDo
 from auth365.utils import replace_localhost
 
 
-class TelegramOAuth:
+class TelegramImplicitOAuth:
     provider: str = "telegram"
     default_scope: Sequence[str] = ["write"]
 
@@ -50,7 +50,7 @@ class TelegramOAuth:
             raise Auth365Error("No Telegram token available. Please authorize first.")
         return self._telegram_token
 
-    def openid_from_response(
+    async def openid_from_response(
         self,
         response: dict[Any, Any],
     ) -> OpenID:
@@ -68,7 +68,7 @@ class TelegramOAuth:
             provider=self.provider,
         )
 
-    def get_authorization_url(
+    async def get_authorization_url(
         self,
         *,
         scope: Sequence[str] | None = None,
@@ -105,4 +105,10 @@ class TelegramOAuth:
         return self.token
 
     async def userinfo(self) -> OpenID:
-        return self.openid_from_response(self.telegram_token.model_dump())
+        return await self.openid_from_response(self.telegram_token.model_dump())
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        pass

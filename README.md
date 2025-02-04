@@ -12,7 +12,7 @@
 ## Features
 
 - **Asynchronous**: Built on top of `httpx` is fully asynchronous.
-- **Built-in support**: For popular OAuth 2.0 providers like **Google**, **GitHub**, **Yandex**, etc.
+- **Built-in support**: For popular OAuth 2.0 providers like **Google**, **Yandex**, etc.
 - **Extensible**: Easily add support for new OAuth 2.0 providers.
 - **Easy to use**: Simple and intuitive API.
 

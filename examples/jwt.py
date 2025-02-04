@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import FastAPI, Form, HTTPException, Response, Depends
 
-from auth365.backend import JWTBackend
+from auth365.jwt import JWTBackend
 from auth365.exceptions import Auth365Error
 from auth365.fastapi.transport import CookieTransport
 from auth365.schemas import JWTConfig, OAuth2PasswordRequest, JWTPayload

@@ -13,7 +13,7 @@ class JWTBackend:
         self.config: MutableMapping[str, JWTConfig] = {t.type: t for t in config}
 
     def create(self, token_type: str, payload: JWTPayload) -> str:
-        config = self.get_type(token_type)
+        config = self.config[token_type]
         now = datetime.datetime.now(datetime.UTC)
         claims = dict(
             iss=config.issuer,
@@ -34,7 +34,7 @@ class JWTBackend:
         token_type: str,
         token: str,
     ) -> JWTPayload:
-        params = self.get_type(token_type)
+        params = self.config[token_type]
         try:
             decoded = jwt.decode(
                 token,
@@ -47,12 +47,6 @@ class JWTBackend:
         if decoded["typ"] != token_type:
             raise InvalidTokenType()
         return JWTPayload.model_validate(decoded)
-
-    def get_type(self, token_type: str) -> JWTConfig:
-        return self.config[token_type]
-
-    def has_type(self, token_type: str) -> bool:
-        return token_type in self.config
 
     def get_lifetime(self, token_type: str) -> int | None:
         expires_in = self.config[token_type].expires_in

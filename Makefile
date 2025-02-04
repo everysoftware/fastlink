@@ -1,6 +1,14 @@
 APP_PATH = auth365
 TESTS_PATH = tests
 
+# Do not forget to configure pypi token:
+# poetry config pypi-token.pypi <token>
+
+.PHONY: publish
+publish:
+	poetry build
+	poetry publish
+
 .PHONY: format
 format:
 	ruff format $(APP_PATH) $(TESTS_PATH)

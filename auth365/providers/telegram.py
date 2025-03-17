@@ -28,7 +28,9 @@ class TelegramImplicitOAuth:
 
         token_info = self.bot_token.split(":")
         if len(token_info) != 2:
-            raise Auth365Error("Invalid bot token. It should be in the format: bot_id:bot_secret")
+            raise Auth365Error(
+                "Invalid bot token. It should be in the format: bot_id:bot_secret"
+            )
         self.bot_id = token_info[0]
 
         self._token: TokenResponse | None = None
@@ -36,7 +38,9 @@ class TelegramImplicitOAuth:
 
     @property
     def discovery(self) -> DiscoveryDocument:
-        return DiscoveryDocument(authorization_endpoint="https://oauth.telegram.org/auth")
+        return DiscoveryDocument(
+            authorization_endpoint="https://oauth.telegram.org/auth"
+        )
 
     @property
     def token(self) -> TokenResponse:
@@ -89,19 +93,25 @@ class TelegramImplicitOAuth:
         self._telegram_token = callback
         response = callback.model_dump()
         code_hash = response.pop("hash")
-        data_check_string = "\n".join(sorted(f"{k}={v}" for k, v in response.items()))
+
+        data_check_string = "\n".join(
+            f"{k}={v}" for k, v in sorted(response.items()) if v
+        )
+
         computed_hash = hmac.new(
             hashlib.sha256(self.bot_token.encode()).digest(),
             data_check_string.encode(),
             "sha256",
         ).hexdigest()
+
         if not hmac.compare_digest(computed_hash, code_hash):
             raise Auth365Error("Invalid Telegram auth data: hash mismatch")
+
         dt = datetime.datetime.fromtimestamp(response["auth_date"], tz=datetime.UTC)
         now = datetime.datetime.now(tz=datetime.UTC)
         if now - dt > datetime.timedelta(seconds=self.expires_in):
             raise Auth365Error("Telegram auth data expired")
-        self._token = TokenResponse(access_token=callback.hash)
+        self._token = TokenResponse(access_token=callback.hash, expires_in=None)
         return self.token
 
     async def userinfo(self) -> OpenID:

@@ -2,11 +2,11 @@ import abc
 from abc import ABC
 from typing import Literal
 
-from fastapi import Response, Request, HTTPException
+from fastapi import HTTPException, Request, Response
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.responses import JSONResponse
 
-from auth365.schemas import TokenResponse
+from fastlink.client.schemas import TokenResponse
 
 
 class Transport(ABC):
@@ -71,7 +71,7 @@ class HeaderTransport(Transport):
 
 
 class CookieTransport(Transport):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         name: str = "access_token",

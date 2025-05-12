@@ -2,9 +2,9 @@ from typing import Any
 
 import httpx
 
-from auth365.providers.base import HttpxClient
-from auth365.exceptions import Auth365Error
-from auth365.schemas import DiscoveryDocument, OpenID
+from fastlink.client.httpx import HttpxClient
+from fastlink.client.schemas import DiscoveryDocument, OpenID
+from fastlink.exceptions import FastLinkError
 
 
 class GoogleOAuth(HttpxClient):
@@ -32,4 +32,4 @@ class GoogleOAuth(HttpxClient):
                 display_name=response.get("name"),
                 picture=response.get("picture"),
             )
-        raise Auth365Error(f"User {response.get('email')} is not verified with Google")
+        raise FastLinkError(f"User {response.get('email')} is not verified with Google")

@@ -1,4 +1,4 @@
-# Auth365
+# FastLink
 
 **Effortless asynchronous OAuth 2.0 client for popular platforms**
 
@@ -19,7 +19,7 @@
 ## Installation
 
 ```bash
-  pip install auth365
+pip install fastlink
 ```
 
 ## Get Started
@@ -30,31 +30,31 @@ from typing import Annotated
 from fastapi import FastAPI, Depends
 from starlette.responses import RedirectResponse
 
-from auth365.providers.google import GoogleOAuth
-from auth365.schemas import OAuth2Callback, OpenID
+from fastlink.google.client import GoogleOAuth
+from fastlink.client.schemas import OAuth2Callback, OpenID
 from examples.config import settings
 
 app = FastAPI()
 
-google_oauth = GoogleOAuth(
-    client_id=settings.google_client_id,
-    client_secret=settings.google_client_secret,
-    redirect_uri="http://localhost:8000/callback",
+oauth = GoogleOAuth(
+    settings.google_client_id,
+    settings.google_client_secret,
+    "http://localhost:8000/callback",
 )
 
 
 @app.get("/login")
 async def login() -> RedirectResponse:
-    async with google_oauth:
-        url = await google_oauth.get_authorization_url()
+    async with oauth:
+        url = await oauth.get_authorization_url()
         return RedirectResponse(url=url)
 
 
 @app.get("/callback")
 async def oauth_callback(callback: Annotated[OAuth2Callback, Depends()]) -> OpenID:
-    async with google_oauth:
-        await google_oauth.authorize(callback)
-        return await google_oauth.userinfo()
+    async with oauth:
+        await oauth.authorize(callback)
+        return await oauth.userinfo()
 
 ```
 

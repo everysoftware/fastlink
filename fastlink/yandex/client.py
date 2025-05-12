@@ -1,7 +1,7 @@
 from typing import Any
 
-from auth365.providers.base import HttpxClient
-from auth365.schemas import DiscoveryDocument, OpenID
+from fastlink.client.httpx import HttpxClient
+from fastlink.client.schemas import DiscoveryDocument, OpenID
 
 
 class YandexOAuth(HttpxClient):
@@ -12,7 +12,7 @@ class YandexOAuth(HttpxClient):
     async def discover(self) -> DiscoveryDocument:
         return DiscoveryDocument(
             authorization_endpoint="https://oauth.yandex.ru/authorize",
-            token_endpoint="https://oauth.yandex.ru/token",
+            token_endpoint="https://oauth.yandex.ru/token",  # noqa: S106
             userinfo_endpoint="https://login.yandex.ru/info",
         )
 

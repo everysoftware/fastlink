@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import FastAPI, Depends
+from fastapi import Depends, FastAPI
 from starlette.responses import RedirectResponse
 
-from auth365.providers.yandex import YandexOAuth
-from auth365.schemas import OAuth2Callback, OpenID
 from examples.config import settings
+from fastlink.client.schemas import OAuth2Callback, OpenID
+from fastlink.yandex.client import YandexOAuth
 
 app = FastAPI()
 

@@ -1,14 +1,17 @@
 import datetime
-from typing import MutableMapping
+from typing import TYPE_CHECKING
 
 import jwt
-from jwt import InvalidTokenError
+from jwt import InvalidTokenError as JWTInvalidTokenError
 
-from auth365.exceptions import InvalidToken, InvalidTokenType
-from auth365.schemas import JWTConfig, JWTPayload
+from fastlink.exceptions import InvalidTokenError, InvalidTokenTypeError
+from fastlink.jwt.schemas import JWTConfig, JWTPayload
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
 
 
-class JWTBackend:
+class JWTManager:
     def __init__(self, *config: JWTConfig) -> None:
         self.config: MutableMapping[str, JWTConfig] = {t.type: t for t in config}
 
@@ -42,10 +45,10 @@ class JWTBackend:
                 algorithms=[params.algorithm],
                 issuer=params.issuer,
             )
-        except InvalidTokenError as e:
-            raise InvalidToken() from e
+        except JWTInvalidTokenError as e:
+            raise InvalidTokenError from e
         if decoded["typ"] != token_type:
-            raise InvalidTokenType()
+            raise InvalidTokenTypeError
         return JWTPayload.model_validate(decoded)
 
     def get_lifetime(self, token_type: str) -> int | None:

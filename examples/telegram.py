@@ -1,15 +1,16 @@
 from typing import Annotated, Any
 
-from fastapi import FastAPI, Depends
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi import Depends, FastAPI
+from fastapi.responses import HTMLResponse, RedirectResponse
 
-from auth365.providers.telegram import TelegramImplicitOAuth
-from auth365.schemas import OpenID, TelegramCallback
 from examples.config import settings
+from fastlink.client.schemas import OpenID
+from fastlink.telegram.auth import TelegramAuth
+from fastlink.telegram.schemas import TelegramCallback
 
 app = FastAPI()
 
-oauth = TelegramImplicitOAuth(
+oauth = TelegramAuth(
     settings.telegram_bot_token,
     "http://localhost:8000/widget",
 )

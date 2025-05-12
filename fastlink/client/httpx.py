@@ -1,68 +1,29 @@
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator, Sequence
 from typing import (
     Any,
-    Sequence,
     Self,
-    AsyncIterator,
 )
 from urllib.parse import urlencode
 
 import httpx
 
-from auth365.exceptions import (
-    TokenUnavailable,
-    DiscoveryUnavailable,
-    ClientUnavailable,
-    NoRedirectURI,
-    AuthorizationFailed,
-    UserinfoFailed,
-    NoState,
+from fastlink.client.abstract import Client
+from fastlink.client.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
+from fastlink.client.utils import generate_random_state
+from fastlink.constants import MAX_SUCCESS_CODE, MIN_SUCCESS_CODE
+from fastlink.exceptions import (
+    AuthorizationError,
+    ClientUnavailableError,
+    DiscoveryUnavailableError,
+    NoRedirectURIError,
+    StateError,
+    TokenUnavailableError,
+    UserinfoError,
 )
-from auth365.schemas import DiscoveryDocument, TokenResponse, OAuth2Callback, OpenID
-from auth365.utils import generate_random_state
 
 
-class OAuth2Client(ABC):
-    provider: str = NotImplemented
-    default_scope: Sequence[str] = []
-
-    @property
-    @abstractmethod
-    def discovery(self) -> DiscoveryDocument: ...
-
-    @property
-    @abstractmethod
-    def token(self) -> TokenResponse: ...
-
-    @abstractmethod
-    async def get_authorization_url(
-        self,
-        *,
-        scope: Sequence[str] | None = None,
-        redirect_uri: str | None = None,
-        params: dict[str, Any] | None = None,
-    ) -> str: ...
-
-    @abstractmethod
-    async def authorize(
-        self,
-        callback: OAuth2Callback,
-        *,
-        body: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> TokenResponse: ...
-
-    @abstractmethod
-    async def userinfo(self) -> OpenID: ...
-
-    @abstractmethod
-    async def __aenter__(self) -> Self: ...
-
-    @abstractmethod
-    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None: ...
-
-
-class HttpxClient(OAuth2Client, ABC):
+class HttpxClient(Client, ABC):
     def __init__(
         self,
         client_id: str,
@@ -94,19 +55,19 @@ class HttpxClient(OAuth2Client, ABC):
     @property
     def discovery(self) -> DiscoveryDocument:
         if self._discovery is None:
-            raise DiscoveryUnavailable("Discovery document is not available. Please discover first.")
+            raise DiscoveryUnavailableError("Discovery document is not available. Please discover first.")
         return self._discovery
 
     @property
     def token(self) -> TokenResponse:
         if not self._token:
-            raise TokenUnavailable("Token is not available. Please authorize first.")
+            raise TokenUnavailableError("Token is not available. Please authorize first.")
         return self._token
 
     @property
     def client(self) -> httpx.AsyncClient:
         if not self._client:
-            raise ClientUnavailable("Client is not available. Please enter the context.")
+            raise ClientUnavailableError("Client is not available. Please enter the context.")
         return self._client
 
     async def get_authorization_url(
@@ -122,7 +83,7 @@ class HttpxClient(OAuth2Client, ABC):
             params |= {"state": state or generate_random_state()}
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
-            raise NoRedirectURI("redirect_uri must be provided, either at construction or request time")
+            raise NoRedirectURIError("redirect_uri must be provided, either at construction or request time")
         request_params = {
             "response_type": "code",
             "client_id": self.client_id,
@@ -146,8 +107,8 @@ class HttpxClient(OAuth2Client, ABC):
             auth=auth,
         )
         content = response.json()
-        if response.status_code < 200 or response.status_code > 299:
-            raise AuthorizationFailed("Authorization failed: %s", content)
+        if response.status_code < MIN_SUCCESS_CODE or response.status_code > MAX_SUCCESS_CODE:
+            raise AuthorizationError("Authorization failed: %s", content)
         self._token = TokenResponse.model_validate(content)
         return self._token
 
@@ -158,8 +119,8 @@ class HttpxClient(OAuth2Client, ABC):
         }
         response = await self.client.get(self.discovery.userinfo_endpoint, headers=headers)
         content = response.json()
-        if response.status_code < 200 or response.status_code > 299:
-            raise UserinfoFailed("Getting userinfo failed: %s", content)
+        if response.status_code < MIN_SUCCESS_CODE or response.status_code > MAX_SUCCESS_CODE:
+            raise UserinfoError("Getting userinfo failed: %s", content)
         return await self.openid_from_response(content)
 
     def _prepare_token_request(
@@ -175,7 +136,7 @@ class HttpxClient(OAuth2Client, ABC):
         headers |= {"Content-Type": "application/x-www-form-urlencoded"}
         if self.use_state:
             if not callback.state:
-                raise NoState("State was not found in the callback")
+                raise StateError("State was not found in the callback")
             body |= {"state": callback.state}
         body = {
             "grant_type": "authorization_code",

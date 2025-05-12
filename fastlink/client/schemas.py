@@ -1,9 +1,9 @@
-import datetime
+from collections.abc import Sequence
 from enum import StrEnum, auto
-from typing import Sequence, Literal, Self
 from urllib.parse import urlencode
 
-from pydantic import BaseModel as PydanticBaseModel, ConfigDict, Field, field_serializer, EmailStr, model_validator
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict, Field
 
 
 class BaseModel(PydanticBaseModel):
@@ -240,7 +240,7 @@ class TokenResponse(BaseModel):
     access_token: str | None = None
     refresh_token: str | None = None
     id_token: str | None = None
-    token_type: str | None = "Bearer"
+    token_type: str | None = "Bearer"  # noqa: S105
     scope: str | None = None
     expires_in: int | None = Field(
         None,
@@ -270,83 +270,6 @@ class DiscoveryDocument(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class JWK(BaseModel):
-    """
-    JSON Web Key (JWK) is a JSON object that represents a cryptographic key.
-    """
-
-    kty: str
-    use: str
-    alg: str
-    kid: str
-    n: str
-    e: str
-
-    model_config = ConfigDict(extra="allow")
-
-
-class JWKS(BaseModel):
-    keys: Sequence[JWK]
-
-
-class JWTPayload(BaseModel):
-    """
-    JSON Web Token (JWT) Claims are the JSON objects that contain the information about the user and the token itself.
-    """
-
-    name: str | None = None
-    given_name: str | None = None
-    family_name: str | None = None
-    email: EmailStr | None = None
-    email_verified: bool | None = None
-    scope: str | None = None
-
-    iss: str | None = None
-    sub: str | None = None
-    aud: str | None = None
-    typ: str | None = None
-    iat: datetime.datetime | None = None
-    exp: datetime.datetime | None = None
-
-    @property
-    def scopes(self) -> Sequence[str]:
-        if self.scope is None:
-            return []
-        return self.scope.split(" ")
-
-    @field_serializer("iat", "exp", mode="plain")
-    def datetime_to_timestamp(self, value: datetime.datetime | None) -> int | None:
-        if value is None:
-            return value
-        return int(value.timestamp())
-
-    model_config = ConfigDict(extra="allow")
-
-
-class JWTConfig(BaseModel):
-    type: str
-    algorithm: Literal["HS256", "RS256"] = "HS256"
-    expires_in: datetime.timedelta = datetime.timedelta(hours=1)
-    key: str | None = None
-    issuer: str | None = None
-    private_key: str | None = None
-    public_key: str | None = None
-
-    @model_validator(mode="after")
-    def validate_key(self) -> Self:
-        if self.algorithm == "HS256":
-            if not self.key:
-                raise ValueError("Key is required for HS256 algorithm")
-            self.private_key = self.key
-            self.public_key = self.key
-        else:
-            if not self.private_key:
-                raise ValueError("Private key is required for RS256 algorithm")
-            if not self.public_key:
-                raise ValueError("Public key is required for RS256 algorithm")
-        return self
-
-
 class OpenID(BaseModel):
     id: str
     provider: str
@@ -359,13 +282,3 @@ class OpenID(BaseModel):
 
 class OpenIDBearer(OpenID, TokenResponse):
     pass
-
-
-class TelegramCallback(BaseModel):
-    id: int
-    first_name: str
-    last_name: str | None = None
-    username: str | None = None
-    photo_url: str | None = None
-    auth_date: int
-    hash: str

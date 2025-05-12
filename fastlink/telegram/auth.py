@@ -1,15 +1,16 @@
-import datetime
-import hashlib
-import hmac
-from typing import Any, Sequence, Self
+from collections.abc import Sequence
+from typing import Any, Self
 from urllib.parse import urlencode
 
-from auth365.exceptions import Auth365Error
-from auth365.schemas import TokenResponse, OpenID, TelegramCallback, DiscoveryDocument
-from auth365.utils import replace_localhost
+from fastlink.client.schemas import DiscoveryDocument, OpenID, TokenResponse
+from fastlink.client.utils import replace_localhost
+from fastlink.constants import TELEGRAM_BOT_TOKEN_VALUES_NUMBER
+from fastlink.exceptions import FastLinkError, InvalidBotTokenError
+from fastlink.telegram.schemas import TelegramCallback
+from fastlink.telegram.utils import check_expiration, verify_hmac_sha256
 
 
-class TelegramImplicitOAuth:
+class TelegramAuth:
     provider: str = "telegram"
     default_scope: Sequence[str] = ["write"]
 
@@ -19,7 +20,7 @@ class TelegramImplicitOAuth:
         redirect_uri: str | None = None,
         scope: Sequence[str] | None = None,
         *,
-        expires_in: int = 5 * 60,
+        expires_in: int = 300,
     ) -> None:
         self.bot_token = bot_token
         self.redirect_uri = redirect_uri
@@ -27,8 +28,8 @@ class TelegramImplicitOAuth:
         self.expires_in = expires_in
 
         token_info = self.bot_token.split(":")
-        if len(token_info) != 2:
-            raise Auth365Error("Invalid bot token. It should be in the format: bot_id:bot_secret")
+        if len(token_info) != TELEGRAM_BOT_TOKEN_VALUES_NUMBER:
+            raise InvalidBotTokenError("Invalid bot token. It should be in the format: bot_id:bot_secret")
         self.bot_id = token_info[0]
 
         self._token: TokenResponse | None = None
@@ -41,13 +42,13 @@ class TelegramImplicitOAuth:
     @property
     def token(self) -> TokenResponse:
         if self._token is None:
-            raise Auth365Error("No token available")
+            raise FastLinkError("No token available")
         return self._token
 
     @property
     def telegram_token(self) -> TelegramCallback:
         if self._telegram_token is None:
-            raise Auth365Error("No Telegram token available. Please authorize first.")
+            raise FastLinkError("No Telegram token available. Please authorize first.")
         return self._telegram_token
 
     async def openid_from_response(
@@ -88,19 +89,9 @@ class TelegramImplicitOAuth:
     async def authorize(self, callback: TelegramCallback) -> TokenResponse:
         self._telegram_token = callback
         response = callback.model_dump()
-        code_hash = response.pop("hash")
-        data_check_string = "\n".join(sorted(f"{k}={v}" for k, v in response.items()))
-        computed_hash = hmac.new(
-            hashlib.sha256(self.bot_token.encode()).digest(),
-            data_check_string.encode(),
-            "sha256",
-        ).hexdigest()
-        if not hmac.compare_digest(computed_hash, code_hash):
-            raise Auth365Error("Invalid Telegram auth data: hash mismatch")
-        dt = datetime.datetime.fromtimestamp(response["auth_date"], tz=datetime.UTC)
-        now = datetime.datetime.now(tz=datetime.UTC)
-        if now - dt > datetime.timedelta(seconds=self.expires_in):
-            raise Auth365Error("Telegram auth data expired")
+        expected_hash = response.pop("hash")
+        verify_hmac_sha256(response, expected_hash, self.bot_token)
+        check_expiration(response, self.expires_in)
         self._token = TokenResponse(access_token=callback.hash)
         return self.token
 

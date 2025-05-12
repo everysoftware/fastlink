@@ -6,7 +6,7 @@ from fastapi import HTTPException, Request, Response
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.responses import JSONResponse
 
-from fastlink.client.schemas import TokenResponse
+from fastlink.schemas import TokenResponse
 
 
 class Transport(ABC):

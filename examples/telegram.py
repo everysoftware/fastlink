@@ -4,8 +4,8 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from examples.config import settings
-from fastlink.client.schemas import OpenID
-from fastlink.telegram.auth import TelegramAuth
+from fastlink import TelegramAuth
+from fastlink.schemas import OpenID
 from fastlink.telegram.schemas import TelegramCallback
 
 app = FastAPI()

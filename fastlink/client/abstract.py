@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import Any, Self
 
-from fastlink.client.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
+from fastlink.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
 
 
 class Client(ABC):

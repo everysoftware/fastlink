@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastlink.client.httpx import HttpxClient
-from fastlink.client.schemas import DiscoveryDocument, OpenID
+from fastlink.schemas import DiscoveryDocument, OpenID
 
 
 class YandexOAuth(HttpxClient):

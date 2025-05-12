@@ -2,11 +2,11 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Response
 
-from fastlink.client.schemas import OAuth2PasswordRequest
 from fastlink.exceptions import FastLinkError
 from fastlink.integrations.fastapi.transport import CookieTransport
 from fastlink.jwt.manager import JWTManager
 from fastlink.jwt.schemas import JWTConfig, JWTPayload
+from fastlink.schemas import OAuth2PasswordRequest
 
 app = FastAPI()
 

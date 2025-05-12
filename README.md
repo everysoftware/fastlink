@@ -31,7 +31,7 @@ from fastapi import FastAPI, Depends
 from starlette.responses import RedirectResponse
 
 from fastlink.google.client import GoogleOAuth
-from fastlink.client.schemas import OAuth2Callback, OpenID
+from fastlink.schemas import OAuth2Callback, OpenID
 from examples.config import settings
 
 app = FastAPI()

@@ -3,8 +3,8 @@ from typing import Any
 import httpx
 
 from fastlink.client.httpx import HttpxClient
-from fastlink.client.schemas import DiscoveryDocument, OpenID
 from fastlink.exceptions import FastLinkError
+from fastlink.schemas import DiscoveryDocument, OpenID
 
 
 class GoogleOAuth(HttpxClient):

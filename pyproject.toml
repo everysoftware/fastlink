@@ -111,6 +111,7 @@ ignore = [
     "S101",  # use of assert detected
     "TRY003",  # avoid specifying long messages outside the exception class
     "PLR6301",  # method could be a function, class method, or static method
+    "RUF200",  # failed to parse pyproject.toml
 ]
 
 [tool.ruff.format]

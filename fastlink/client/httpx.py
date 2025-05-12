@@ -9,7 +9,6 @@ from urllib.parse import urlencode
 import httpx
 
 from fastlink.client.abstract import Client
-from fastlink.client.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
 from fastlink.client.utils import generate_random_state
 from fastlink.constants import MAX_SUCCESS_CODE, MIN_SUCCESS_CODE
 from fastlink.exceptions import (
@@ -21,6 +20,7 @@ from fastlink.exceptions import (
     TokenUnavailableError,
     UserinfoError,
 )
+from fastlink.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
 
 
 class HttpxClient(Client, ABC):

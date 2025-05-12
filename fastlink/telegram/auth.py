@@ -2,10 +2,10 @@ from collections.abc import Sequence
 from typing import Any, Self
 from urllib.parse import urlencode
 
-from fastlink.client.schemas import DiscoveryDocument, OpenID, TokenResponse
 from fastlink.client.utils import replace_localhost
 from fastlink.constants import TELEGRAM_BOT_TOKEN_VALUES_NUMBER
 from fastlink.exceptions import FastLinkError, InvalidBotTokenError
+from fastlink.schemas import DiscoveryDocument, OpenID, TokenResponse
 from fastlink.telegram.schemas import TelegramCallback
 from fastlink.telegram.utils import check_expiration, verify_hmac_sha256
 

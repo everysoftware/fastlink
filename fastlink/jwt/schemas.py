@@ -4,7 +4,7 @@ from typing import Literal, Self
 
 from pydantic import ConfigDict, EmailStr, field_serializer, model_validator
 
-from fastlink.client.schemas import BaseModel
+from fastlink.schemas import BaseModel
 
 
 class JWTPayload(BaseModel):

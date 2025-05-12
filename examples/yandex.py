@@ -4,8 +4,8 @@ from fastapi import Depends, FastAPI
 from starlette.responses import RedirectResponse
 
 from examples.config import settings
-from fastlink.client.schemas import OAuth2Callback, OpenID
-from fastlink.yandex.client import YandexOAuth
+from fastlink import YandexOAuth
+from fastlink.schemas import OAuth2Callback, OpenID
 
 app = FastAPI()
 

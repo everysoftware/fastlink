@@ -1,4 +1,4 @@
-from fastlink.client.schemas import BaseModel
+from fastlink.schemas import BaseModel
 
 
 class TelegramCallback(BaseModel):

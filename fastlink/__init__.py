@@ -1,4 +1,3 @@
-from fastlink.client import schemas
 from fastlink.client.httpx import HttpxClient
 from fastlink.google.client import GoogleOAuth
 from fastlink.telegram.auth import TelegramAuth
@@ -9,5 +8,4 @@ __all__ = [
     "HttpxClient",
     "TelegramAuth",
     "YandexOAuth",
-    "schemas",
 ]

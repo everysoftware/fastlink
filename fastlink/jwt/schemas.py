@@ -7,25 +7,6 @@ from pydantic import ConfigDict, EmailStr, field_serializer, model_validator
 from fastlink.client.schemas import BaseModel
 
 
-class JWK(BaseModel):
-    """
-    JSON Web Key (JWK) is a JSON object that represents a cryptographic key.
-    """
-
-    kty: str
-    use: str
-    alg: str
-    kid: str
-    n: str
-    e: str
-
-    model_config = ConfigDict(extra="allow")
-
-
-class JWKS(BaseModel):
-    keys: Sequence[JWK]
-
-
 class JWTPayload(BaseModel):
     """
     JSON Web Token (JWT) Claims are the JSON objects that contain the information about the user and the token itself.

@@ -282,3 +282,22 @@ class OpenID(BaseModel):
 
 class OpenIDBearer(OpenID, TokenResponse):
     pass
+
+
+class JWK(BaseModel):
+    """
+    JSON Web Key (JWK) is a JSON object that represents a cryptographic key.
+    """
+
+    kty: str
+    use: str
+    alg: str
+    kid: str
+    n: str
+    e: str
+
+    model_config = ConfigDict(extra="allow")
+
+
+class JWKS(BaseModel):
+    keys: Sequence[JWK]

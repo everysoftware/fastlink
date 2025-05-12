@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastlink"
-version = "0.1.0"
+version = "0.1.1"
 description = "Asynchronous OAuth 2.0 client for such platforms as Google, GitHub, Yandex, etc."
 authors = ["everysoftware <pravitel2015ify@gmail.com>"]
 readme = "README.md"
@@ -33,7 +33,7 @@ classifiers = [
 ]
 packages = [{ include = "fastlink" }]
 
-[tool.poetry.urls]
+[project.urls]
 Homepage = "https://github.com/everysoftware/fastlink"
 Documentation = ""
 Repository = "https://github.com/everysoftware/fastlink"

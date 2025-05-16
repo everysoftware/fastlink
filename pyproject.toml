@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastlink"
-version = "0.1.2"
+version = "0.1.3"
 description = "Asynchronous OAuth 2.0 client for such platforms as Google, GitHub, Yandex, etc."
 authors = ["everysoftware <pravitel2015ify@gmail.com>"]
 readme = "README.md"

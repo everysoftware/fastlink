@@ -59,7 +59,7 @@ class TelegramAuth:
             response["first_name"],
             response.get("last_name"),
         )
-        display_name = f"{first_name} {last_name}" if first_name else first_name
+        display_name = f"{first_name} {last_name}" if last_name else first_name
         return OpenID(
             id=str(response["id"]),
             first_name=first_name,
@@ -88,7 +88,7 @@ class TelegramAuth:
 
     async def authorize(self, callback: TelegramCallback) -> TokenResponse:
         self._telegram_token = callback
-        response = callback.model_dump()
+        response = callback.model_dump(exclude_none=True)
         expected_hash = response.pop("hash")
         verify_hmac_sha256(response, expected_hash, self.bot_token)
         check_expiration(response, self.expires_in)

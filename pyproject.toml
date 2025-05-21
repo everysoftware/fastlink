@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "fastlink"
 version = "0.1.3"
-description = "Asynchronous OAuth 2.0 client for such platforms as Google, GitHub, Yandex, etc."
+description = "FastLink OAuth 2.0 client for various platforms, asynchronous, easy-to-use, extensible"
 authors = ["everysoftware <pravitel2015ify@gmail.com>"]
 readme = "README.md"
 license = "MIT"
@@ -33,9 +33,12 @@ classifiers = [
 ]
 packages = [{ include = "fastlink" }]
 
+[project]
+name = "fastlink"
+
 [project.urls]
 Homepage = "https://github.com/everysoftware/fastlink"
-Documentation = ""
+Documentation = "https://github.com/everysoftware/fastlink"
 Repository = "https://github.com/everysoftware/fastlink"
 
 [tool.poetry.dependencies]
@@ -44,6 +47,7 @@ pydantic = "^2.10.6"
 httpx = "^0.28.1"
 pyjwt = "^2.10.1"
 fastapi = {extras = ["standart"], version = "^0.115.7"}
+aiogram = "^3.20.0.post0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9.3"

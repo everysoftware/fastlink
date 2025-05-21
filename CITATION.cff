@@ -1,0 +1,23 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: FastLink
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ivan
+    family-names: Stasevich
+    email: pravitel2015ify@gmail.com
+repository-code: 'https://github.com/everysoftware/fastlink'
+abstract: >-
+  FastLink OAuth 2.0 client for various platforms,
+  asynchronous, easy-to-use, extensible
+keywords:
+  - httpx
+  - pydantic
+  - oauth2
+  - fastapi
+license: MIT

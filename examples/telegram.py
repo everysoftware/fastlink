@@ -10,24 +10,24 @@ from fastlink.telegram.schemas import TelegramCallback
 
 app = FastAPI()
 
-oauth = TelegramSSO(settings.telegram_bot_token, "http://localhost:8000/widget", "http://localhost:8000/callback")
+sso = TelegramSSO(settings.telegram_bot_token, "http://localhost:8000/widget", "http://localhost:8000/callback")
 
 
 @app.get("/login")
 async def login() -> RedirectResponse:
-    async with oauth:
-        url = await oauth.login_url()
+    async with sso:
+        url = await sso.login_url()
         return RedirectResponse(url=url)
 
 
 @app.get("/widget")
 async def widget() -> HTMLResponse:
-    async with oauth:
-        content = await oauth.widget()
+    async with sso:
+        content = await sso.widget()
         return HTMLResponse(content=content)
 
 
 @app.get("/callback")
 async def callback(call: Annotated[TelegramCallback, Depends()]) -> OpenID:
-    async with oauth:
-        return await oauth.callback(call)
+    async with sso:
+        return await sso.callback(call)

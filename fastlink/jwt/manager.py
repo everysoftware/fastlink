@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import jwt
 from jwt import InvalidTokenError as JWTInvalidTokenError
 
-from fastlink.exceptions import InvalidTokenError, InvalidTokenTypeError
+from fastlink.exceptions import InvalidTokenTypeError, TokenError
 from fastlink.jwt.schemas import JWTConfig, JWTPayload
 
 if TYPE_CHECKING:
@@ -46,7 +46,7 @@ class JWTManager:
                 issuer=params.issuer,
             )
         except JWTInvalidTokenError as e:
-            raise InvalidTokenError from e
+            raise TokenError from e
         if decoded["typ"] != token_type:
             raise InvalidTokenTypeError
         return JWTPayload.model_validate(decoded)

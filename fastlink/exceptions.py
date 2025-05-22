@@ -2,19 +2,19 @@ class FastLinkError(Exception):
     pass
 
 
-class TokenUnavailableError(FastLinkError):
+class TokenError(FastLinkError):
     pass
 
 
-class DiscoveryUnavailableError(FastLinkError):
+class DiscoveryError(FastLinkError):
     pass
 
 
-class ClientUnavailableError(FastLinkError):
+class ClientError(FastLinkError):
     pass
 
 
-class NoRedirectURIError(FastLinkError):
+class RedirectURIError(FastLinkError):
     pass
 
 
@@ -30,19 +30,7 @@ class StateError(FastLinkError):
     pass
 
 
-class NoTokenProvidedError(FastLinkError):
-    pass
-
-
-class InvalidTokenError(FastLinkError):
-    pass
-
-
 class InvalidTokenTypeError(FastLinkError):
-    pass
-
-
-class InvalidBotTokenError(FastLinkError):
     pass
 
 

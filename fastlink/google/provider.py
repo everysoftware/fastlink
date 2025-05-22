@@ -1,22 +1,12 @@
 from typing import Any
 
-import httpx
-
-from fastlink.client.httpx import HttpxClient
+from fastlink.base.provider import SSOBase
 from fastlink.exceptions import FastLinkError
-from fastlink.schemas import DiscoveryDocument, OpenID
+from fastlink.schemas import OpenID, ProviderMeta
 
 
-class GoogleOAuth(HttpxClient):
-    discovery_url = "https://accounts.google.com/.well-known/openid-configuration"
-    provider = "google"
-    default_scope = ["openid", "email", "profile"]
-
-    async def discover(self) -> DiscoveryDocument:
-        async with httpx.AsyncClient() as session:
-            response = await session.get(self.discovery_url)
-            content = response.json()
-            return DiscoveryDocument.model_validate(content)
+class GoogleSSO(SSOBase):
+    meta = ProviderMeta(name="google", server_url="https://accounts.google.com", scope=["openid", "email", "profile"])
 
     async def openid_from_response(
         self,
@@ -25,7 +15,6 @@ class GoogleOAuth(HttpxClient):
         if response.get("email_verified"):
             return OpenID(
                 email=response.get("email"),
-                provider=self.provider,
                 id=response.get("sub"),
                 first_name=response.get("given_name"),
                 last_name=response.get("family_name"),

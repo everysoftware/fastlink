@@ -1,20 +1,20 @@
 # FastLink
 
-**Effortless asynchronous OAuth 2.0 client for popular platforms**
+_OAuth 2.0 client for various platforms, asynchronous, easy-to-use, extensible_
 
 ---
 
-[![Test](https://github.com/everysoftware/fastid/actions/workflows/test.yml/badge.svg)](https://github.com/everysoftware/fastid/actions/workflows/test.yml)
-[![CodeQL Advanced](https://github.com/everysoftware/fastid/actions/workflows/codeql.yml/badge.svg)](https://github.com/everysoftware/fastid/actions/workflows/codeql.yml)
+[![Test](https://github.com/everysoftware/fastlink/actions/workflows/test.yml/badge.svg)](https://github.com/everysoftware/fastlink/actions/workflows/test.yml)
+[![CodeQL Advanced](https://github.com/everysoftware/fastlink/actions/workflows/codeql.yml/badge.svg)](https://github.com/everysoftware/fastlink/actions/workflows/codeql.yml)
 
 ---
 
 ## Features
 
+- **All-in-one**: Supports popular platforms like **Google**, **Yandex**, **Telegram**, etc.
 - **Asynchronous**: Built on top of `httpx` is fully asynchronous.
-- **Built-in support**: For popular OAuth 2.0 providers like **Google**, **Yandex**, **Telegram**, etc.
-- **Extensible**: Easily add support for new OAuth 2.0 providers.
-- **Easy to use**: Simple and intuitive API.
+- **Easy-to-use**: Simple and intuitive API for quick integration.
+- **Extensible**: Easily add support for new platforms or customize existing ones.
 
 ## Installation
 
@@ -27,16 +27,16 @@ pip install fastlink
 ```python
 from typing import Annotated
 
-from fastapi import FastAPI, Depends
-from starlette.responses import RedirectResponse
+from fastapi import Depends, FastAPI
+from fastapi.responses import RedirectResponse
 
-from fastlink.google.client import GoogleOAuth
-from fastlink.schemas import OAuth2Callback, OpenID
 from examples.config import settings
+from fastlink import GoogleSSO
+from fastlink.schemas import OAuth2Callback, OpenID
 
 app = FastAPI()
 
-oauth = GoogleOAuth(
+oauth = GoogleSSO(
     settings.google_client_id,
     settings.google_client_secret,
     "http://localhost:8000/callback",
@@ -46,15 +46,14 @@ oauth = GoogleOAuth(
 @app.get("/login")
 async def login() -> RedirectResponse:
     async with oauth:
-        url = await oauth.get_authorization_url()
+        url = await oauth.login_url()
         return RedirectResponse(url=url)
 
 
 @app.get("/callback")
-async def oauth_callback(callback: Annotated[OAuth2Callback, Depends()]) -> OpenID:
+async def callback(call: Annotated[OAuth2Callback, Depends()]) -> OpenID:
     async with oauth:
-        await oauth.authorize(callback)
-        return await oauth.userinfo()
+        return await oauth.callback(call)
 
 ```
 

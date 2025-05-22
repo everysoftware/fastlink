@@ -1,9 +1,10 @@
 from collections.abc import Sequence
 from enum import StrEnum, auto
+from typing import Any
 from urllib.parse import urlencode
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 
 class BaseModel(PydanticBaseModel):
@@ -270,9 +271,30 @@ class DiscoveryDocument(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class ProviderMeta(BaseModel):
+    """
+    ProviderMeta is a metadata about the OpenID Connect provider.
+    """
+
+    name: str | None = None
+    server_url: str | None = None
+    discovery_url: str | None = None
+    discovery: DiscoveryDocument | None = None
+    scope: Sequence[str] | None = None
+    use_state: bool = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_discovery(cls, values: dict[str, Any]) -> dict[str, Any]:
+        if values.get("discovery_url") is None and values.get("discovery") is None and values.get("server_url") is None:
+            raise ValueError(
+                "Discovery document is not provided. Please provide a discovery, server_url or discovery_url."
+            )
+        return values
+
+
 class OpenID(BaseModel):
     id: str
-    provider: str
     email: str | None = None
     first_name: str | None = None
     last_name: str | None = None

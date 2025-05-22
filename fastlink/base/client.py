@@ -1,79 +1,82 @@
-from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Sequence
 from typing import (
     Any,
     Self,
+    cast,
 )
 from urllib.parse import urlencode
 
 import httpx
 
-from fastlink.client.abstract import Client
-from fastlink.client.utils import generate_random_state
+from fastlink.base.utils import generate_random_state
 from fastlink.constants import MAX_SUCCESS_CODE, MIN_SUCCESS_CODE
 from fastlink.exceptions import (
     AuthorizationError,
-    ClientUnavailableError,
-    DiscoveryUnavailableError,
-    NoRedirectURIError,
+    ClientError,
+    DiscoveryError,
+    RedirectURIError,
     StateError,
-    TokenUnavailableError,
+    TokenError,
     UserinfoError,
 )
-from fastlink.schemas import DiscoveryDocument, OAuth2Callback, OpenID, TokenResponse
+from fastlink.schemas import DiscoveryDocument, OAuth2Callback, ProviderMeta, TokenResponse
 
 
-class HttpxClient(Client, ABC):
+class FastLink:
     def __init__(
         self,
+        meta: ProviderMeta,
         client_id: str,
         client_secret: str,
         redirect_uri: str | None = None,
         scope: Sequence[str] | None = None,
-        *,
-        use_state: bool = True,
     ) -> None:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scope = scope or self.default_scope
-        self.use_state = use_state
+        self.use_state = meta.use_state
+        self.discovery_url = meta.discovery_url
+        self._discovery = None
+
+        scope = scope or meta.scope
+        assert scope is not None
+        self.scope = scope
+
+        if meta.discovery is not None:
+            self._discovery = meta.discovery
+
+        if meta.server_url is not None:
+            self.discovery_url = f"{meta.server_url}/.well-known/openid-configuration"
 
         self._token: TokenResponse | None = None
-        self._discovery: DiscoveryDocument | None = None
         self._client: httpx.AsyncClient | None = None
-
-    @abstractmethod
-    async def discover(self) -> DiscoveryDocument: ...
-
-    @abstractmethod
-    async def openid_from_response(
-        self,
-        response: dict[Any, Any],
-    ) -> OpenID: ...
 
     @property
     def discovery(self) -> DiscoveryDocument:
         if self._discovery is None:
-            raise DiscoveryUnavailableError("Discovery document is not available. Please discover first.")
+            raise DiscoveryError("Discovery document is not available. Please discover first.")
         return self._discovery
 
     @property
     def token(self) -> TokenResponse:
         if not self._token:
-            raise TokenUnavailableError("Token is not available. Please authorize first.")
+            raise TokenError("Token is not available. Please authorize first.")
         return self._token
 
     @property
     def client(self) -> httpx.AsyncClient:
         if not self._client:
-            raise ClientUnavailableError("Client is not available. Please enter the context.")
+            raise ClientError("Client is not available. Please enter the context.")
         return self._client
 
-    async def get_authorization_url(
+    async def discover(self) -> DiscoveryDocument:
+        assert self.discovery_url is not None
+        response = await self.client.get(self.discovery_url)
+        return DiscoveryDocument.model_validate(response.json())
+
+    async def login_url(
         self,
         *,
-        scope: Sequence[str] | None = None,
         redirect_uri: str | None = None,
         state: str | None = None,
         params: dict[str, Any] | None = None,
@@ -83,17 +86,17 @@ class HttpxClient(Client, ABC):
             params |= {"state": state or generate_random_state()}
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
-            raise NoRedirectURIError("redirect_uri must be provided, either at construction or request time")
+            raise RedirectURIError("redirect_uri must be provided, either at construction or request time")
         request_params = {
             "response_type": "code",
             "client_id": self.client_id,
-            "scope": " ".join(scope or self.scope),
+            "scope": " ".join(self.scope),
             "redirect_uri": redirect_uri,
             **params,
         }
         return f"{self.discovery.authorization_endpoint}?{urlencode(request_params)}"
 
-    async def authorize(
+    async def login(
         self,
         callback: OAuth2Callback,
         *,
@@ -112,7 +115,7 @@ class HttpxClient(Client, ABC):
         self._token = TokenResponse.model_validate(content)
         return self._token
 
-    async def userinfo(self) -> OpenID:
+    async def userinfo(self) -> dict[str, Any]:
         assert self.discovery.userinfo_endpoint is not None
         headers = {
             "Authorization": f"{self.token.token_type} {self.token.access_token}",
@@ -121,7 +124,7 @@ class HttpxClient(Client, ABC):
         content = response.json()
         if response.status_code < MIN_SUCCESS_CODE or response.status_code > MAX_SUCCESS_CODE:
             raise UserinfoError("Getting userinfo failed: %s", content)
-        return await self.openid_from_response(content)
+        return cast("dict[str, Any]", content)
 
     def _prepare_token_request(
         self,
@@ -165,5 +168,5 @@ class HttpxClient(Client, ABC):
         await self.client.__aexit__(exc_type, exc_value, traceback)
 
     async def __call__(self) -> AsyncIterator[Self]:
-        async with self as oauth:
-            yield oauth
+        async with self:
+            yield self

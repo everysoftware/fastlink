@@ -9,3 +9,9 @@ class TelegramCallback(BaseModel):
     photo_url: str | None = None
     auth_date: int
     hash: str
+
+
+class TelegramWidget(BaseModel):
+    bot_username: str
+    callback_url: str
+    scope: str = "write"

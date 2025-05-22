@@ -1,20 +1,20 @@
 from typing import Any
 
-from fastlink.client.httpx import HttpxClient
-from fastlink.schemas import DiscoveryDocument, OpenID
+from fastlink.base.provider import SSOBase
+from fastlink.schemas import DiscoveryDocument, OpenID, ProviderMeta
 
 
-class YandexOAuth(HttpxClient):
-    provider = "yandex"
-    default_scope = ["login:email", "login:info", "login:avatar"]
-    avatar_url = "https://avatars.yandex.net/get-yapic"
-
-    async def discover(self) -> DiscoveryDocument:
-        return DiscoveryDocument(
+class YandexSSO(SSOBase):
+    meta = ProviderMeta(
+        name="yandex",
+        discovery=DiscoveryDocument(
             authorization_endpoint="https://oauth.yandex.ru/authorize",
             token_endpoint="https://oauth.yandex.ru/token",  # noqa: S106
             userinfo_endpoint="https://login.yandex.ru/info",
-        )
+        ),
+        scope=["login:email", "login:info", "login:avatar"],
+    )
+    avatar_url = "https://avatars.yandex.net/get-yapic"
 
     async def openid_from_response(
         self,
@@ -26,7 +26,6 @@ class YandexOAuth(HttpxClient):
         return OpenID(
             email=response.get("default_email"),
             display_name=response.get("display_name"),
-            provider=self.provider,
             id=response.get("id"),
             first_name=response.get("first_name"),
             last_name=response.get("last_name"),

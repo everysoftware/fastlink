@@ -13,7 +13,7 @@ format:
 .PHONY: lint
 lint:
 	ruff check . --fix
-	mypy . --install-types
+	mypy .
 
 # Windows only
 PHONY: kill

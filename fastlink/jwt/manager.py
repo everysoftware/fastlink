@@ -1,5 +1,5 @@
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import jwt
 from jwt import InvalidTokenError as JWTInvalidTokenError
@@ -26,11 +26,12 @@ class JWTManager:
         )
         if config.expires_in is not None:
             claims["exp"] = now + config.expires_in
-        return jwt.encode(
+        token = jwt.encode(
             claims,
             config.private_key,
             algorithm=config.algorithm,
         )
+        return cast("str", token)
 
     def validate(
         self,

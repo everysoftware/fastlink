@@ -26,6 +26,7 @@ class JWTManager:
         )
         if config.expires_in is not None:
             claims["exp"] = now + config.expires_in
+        assert config.private_key is not None
         return jwt.encode(
             claims,
             config.private_key,
@@ -37,13 +38,14 @@ class JWTManager:
         token_type: str,
         token: str,
     ) -> JWTPayload:
-        params = self.config[token_type]
+        config = self.config[token_type]
+        assert config.public_key is not None
         try:
             decoded = jwt.decode(
                 token,
-                params.public_key,
-                algorithms=[params.algorithm],
-                issuer=params.issuer,
+                config.public_key,
+                algorithms=[config.algorithm],
+                issuer=config.issuer,
             )
         except JWTInvalidTokenError as e:
             raise TokenError from e

@@ -15,6 +15,12 @@ lint:
 	ruff check . --fix
 	mypy .
 
+.PHONY: check
+check:
+	ruff check .
+	ruff format . --check
+	mypy .
+
 # Windows only
 PHONY: kill
 kill:

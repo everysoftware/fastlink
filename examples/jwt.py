@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Response
+from starlette import status
 
 from fastlink.exceptions import FastLinkError
 from fastlink.integrations.fastapi.transport import CookieTransport
@@ -17,7 +18,7 @@ manager = JWTManager(JWTConfig(type="access", key="secret"))
 @app.post("/login")
 def login(form: Annotated[OAuth2PasswordRequest, Form()]) -> Response:
     if form.username != "admin" or form.password != "admin":  # noqa: S105
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password")
     token = manager.create("access", JWTPayload(sub=form.username))
     return transport.set_token(Response(), token)
 
@@ -27,5 +28,5 @@ def get_me(token: Annotated[str, Depends(transport)]) -> JWTPayload:
     try:
         payload = manager.validate("access", token)
     except FastLinkError as e:
-        raise HTTPException(status_code=401, detail="Invalid token") from e
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from e
     return payload

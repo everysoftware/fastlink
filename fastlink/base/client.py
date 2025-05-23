@@ -98,12 +98,12 @@ class FastLink:
 
     async def login(
         self,
-        callback: OAuth2Callback,
+        call: OAuth2Callback,
         *,
         body: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> TokenResponse:
-        request = self._prepare_token_request(callback, body=body, headers=headers)
+        request = self._prepare_token_request(call, body=body, headers=headers)
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
         response = await self.client.send(
             request,
@@ -126,9 +126,13 @@ class FastLink:
             raise UserinfoError("Getting userinfo failed: %s", content)
         return cast("dict[str, Any]", content)
 
+    async def callback_raw(self, call: OAuth2Callback) -> dict[str, Any]:
+        await self.login(call)
+        return await self.userinfo()
+
     def _prepare_token_request(
         self,
-        callback: OAuth2Callback,
+        call: OAuth2Callback,
         *,
         body: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
@@ -138,13 +142,13 @@ class FastLink:
         headers = headers or {}
         headers |= {"Content-Type": "application/x-www-form-urlencoded"}
         if self.use_state:
-            if not callback.state:
+            if not call.state:
                 raise StateError("State was not found in the callback")
-            body |= {"state": callback.state}
+            body |= {"state": call.state}
         body = {
             "grant_type": "authorization_code",
-            "code": callback.code,
-            "redirect_uri": callback.redirect_uri or self.redirect_uri,
+            "code": call.code,
+            "redirect_uri": call.redirect_uri or self.redirect_uri,
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             **body,

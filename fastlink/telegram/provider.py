@@ -101,6 +101,10 @@ class TelegramSSO:
         assert self._callback is not None
         return self._callback.model_dump(exclude_none=True)
 
+    async def callback_raw(self, call: TelegramCallback) -> dict[str, Any]:
+        await self.login(call)
+        return await self.userinfo()
+
     async def openid_from_response(self, response: dict[str, Any]) -> OpenID:
         first_name, last_name = (
             response["first_name"],

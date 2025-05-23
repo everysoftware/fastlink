@@ -25,7 +25,7 @@ pip install fastlink
 ## Get Started
 
 ```python
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import RedirectResponse
@@ -54,7 +54,6 @@ async def login() -> RedirectResponse:
 async def callback(call: Annotated[OAuth2Callback, Depends()]) -> OpenID:
     async with sso:
         return await sso.callback(call)
-
 ```
 
 Now you can run the server and visit `http://localhost:8000/login` to start the OAuth 2.0 flow.

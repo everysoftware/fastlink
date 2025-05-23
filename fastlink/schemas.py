@@ -277,6 +277,7 @@ class ProviderMeta(BaseModel):
     """
 
     name: str | None = None
+    title: str | None = None
     server_url: str | None = None
     discovery_url: str | None = None
     discovery: DiscoveryDocument | None = None
@@ -300,10 +301,6 @@ class OpenID(BaseModel):
     last_name: str | None = None
     display_name: str | None = None
     picture: str | None = None
-
-
-class OpenIDBearer(OpenID, TokenResponse):
-    pass
 
 
 class JWK(BaseModel):

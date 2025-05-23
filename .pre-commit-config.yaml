@@ -25,13 +25,11 @@ repos:
         -   --unsafe
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
--   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.11.9
+
+-   repo: local
     hooks:
-    -   id: ruff
-        args:
-        - --fix
-    -   id: ruff-format
-ci:
-    autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-    autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+      - id: lint
+        name: Linter
+        stages: [pre-commit, pre-merge-commit, manual]
+        language: system
+        entry: make lint

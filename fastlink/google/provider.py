@@ -6,7 +6,9 @@ from fastlink.schemas import OpenID, ProviderMeta
 
 
 class GoogleSSO(SSOBase):
-    meta = ProviderMeta(name="google", server_url="https://accounts.google.com", scope=["openid", "email", "profile"])
+    meta = ProviderMeta(
+        name="google", title="Google", server_url="https://accounts.google.com", scope=["openid", "email", "profile"]
+    )
 
     async def openid_from_response(
         self,

@@ -7,6 +7,7 @@ from fastlink.schemas import DiscoveryDocument, OpenID, ProviderMeta
 class YandexSSO(SSOBase):
     meta = ProviderMeta(
         name="yandex",
+        title="Yandex",
         discovery=DiscoveryDocument(
             authorization_endpoint="https://oauth.yandex.ru/authorize",
             token_endpoint="https://oauth.yandex.ru/token",  # noqa: S106

@@ -15,6 +15,7 @@ from fastlink.telegram.utils import check_expiration, verify_hmac_sha256
 class TelegramSSO:
     meta = ProviderMeta(
         name="telegram",
+        title="Telegram",
         discovery=DiscoveryDocument(authorization_endpoint="https://oauth.telegram.org/auth"),
         scope=["write"],
     )

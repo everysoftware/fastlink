@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastlink"
-version = "0.1.5"
+version = "0.1.6"
 description = "FastLink OAuth 2.0 client for various platforms, asynchronous, easy-to-use, extensible"
 authors = ["everysoftware <pravitel2015ify@gmail.com>"]
 readme = "README.md"
